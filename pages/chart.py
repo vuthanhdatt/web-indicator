@@ -9,17 +9,32 @@ import dash_core_components as dcc
 from dash import Input, Output, callback
 import pandas as pd
 
+def load_com(exchange):
+    with open(f'datas/{exchange}/com.txt') as f:
+        content = f.read()
+        com = content.split(',')
+        f.close()
+    return com[:-1]
 
-coms = ['AAA','VCB','HPG','FRT','FTS']
+exchange_com_dict = dict(hose=load_com('hose'), hnx=load_com('hnx'), upcom=load_com('upcom'))
+exchanges = list(exchange_com_dict.keys())
+
+coms = load_com('hose')
 indis  = ['sma-5','sma-50', 'sma-200']
 
 def layout(com=coms[0], indi = indis[1]):
     return html.Div([
-        html.Div([dcc.Dropdown(
-            id = 'com',
+        html.Div(
+            [dcc.Dropdown(
+            id = 'exchange',
             options = [
-                {"label": x, "value": x} for x in coms
+                {"label": x, "value": x} for x in exchanges
             ],
+            value=com,
+            clearable=False,
+        ),
+                dcc.Dropdown(
+            id = 'com',
             value=com,
             clearable=False,
         ),
@@ -30,7 +45,8 @@ def layout(com=coms[0], indi = indis[1]):
             ],
             value=[indi],
             clearable=False,
-            multi=True
+            multi=True,
+            
         )
         ]),
     dcc.Graph(className='plot', id='chart')
@@ -41,10 +57,13 @@ def SMA(df, day):
 
 sma_color = ['blue','red','orange']
 
+@callback(Output('com','options'),Input('exchange','value'))
+def update_date_dropdown(name):
+    return [{'label': i, 'value': i} for i in exchange_com_dict[name]]
 
-@callback(Output("chart", "figure"), Input("com", "value"), Input('indicator', 'value'))
-def update_bar_chart(com, indi):
-    df = pd.read_csv(f'https://raw.githubusercontent.com/vuthanhdatt/vn-stock-price/main/hose/{com}.csv')
+@callback(Output("chart", "figure"),Input("exchange", "value"), Input("com", "value"), Input('indicator', 'value'))
+def update_bar_chart(exchange,com, indi):
+    df = pd.read_csv(f'datas/{exchange}/{com}.csv')
     df.drop(labels='Unnamed: 0', axis=1, inplace=True)
     df['Date'] = pd.to_datetime(df['Date'],format='%d/%m/%Y')
     # df['SMA'] = df.Close.rolling(20).mean()

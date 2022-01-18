@@ -1,2 +1,4 @@
 .indiweb/
 __pycache__/
+.env
+*.ipynb

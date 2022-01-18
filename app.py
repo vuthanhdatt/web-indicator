@@ -17,7 +17,7 @@ navbar = dbc.NavbarSimple(
             
         ],
     ),
-    brand="BCB",
+    brand="somthing",
     dark=True,
     brand_href= '/',
     color="primary",
