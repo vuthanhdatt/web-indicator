@@ -1,11 +1,12 @@
+from datetime import date
+
+import numpy as np
 import pandas as pd
 from ta import add_all_ta_features
-import numpy as np
-from datetime import date
 
 
 def process(data, day):
-    data['Date'] = pd.to_datetime(data['Date'])
+    data['Date'] = pd.to_datetime(data['Date'], format='%d/%m/%Y')
     data.set_index('Date',inplace=True)
     data = data.replace('-',np.nan)
     data = data.astype('float64')

@@ -1,108 +1,212 @@
 import dash
+import dash_core_components as dcc
+import dash_html_components as html
+import numpy as np
+import pandas as pd
+import plotly.graph_objects as go
+from dash import Input, Output, callback
+from pandas import DataFrame, Series
+
+from ta.trend import PSARIndicator
 
 dash.register_page(__name__)
 
 
-import plotly.graph_objects as go
-import dash_html_components as html
-import dash_core_components as dcc
-from dash import Input, Output, callback
-import pandas as pd
-
-from ta.trend import PSARIndicator
-
-def load_com(exchange):
+def load_com(exchange: str) -> list:
     with open(f'datas/{exchange}/com.txt') as f:
         content = f.read()
         com = content.split(',')
         f.close()
     return com[:-1]
 
-exchange_com_dict = dict(hose=load_com('hose'), hnx=load_com('hnx'), upcom=load_com('upcom'))
+
+exchange_com_dict = dict(HOSE=load_com(
+    'hose'), HNX=load_com('hnx'), UPCOM=load_com('upcom'))
 exchanges = list(exchange_com_dict.keys())
 
+# Available indicator
+indis = ['sma-5', 'sma-50', 'sma-200', 'par']
 
-indis  = ['sma-5','sma-50', 'sma-200','par']
 
-def layout(com='AAA',exchange='hose', indi = indis[0]):
+def process(data: DataFrame) -> DataFrame:
+    '''
+    Adjust open, high, low price base on adjust close price
+
+    Parameters
+    ----------
+    data : DataFrame
+
+
+    Returns
+    -------
+    DataFrame
+
+    '''
+    data['Date'] = pd.to_datetime(data['Date'], format='%d/%m/%Y')
+    data.set_index('Date', inplace=True)
+    data = data.replace('-', np.nan)
+    data = data.astype('float64')
+    data['Open'] = round(data['Open']*(data['Adj Close']/data['Close']), -2)
+    data['Low'] = round(data['Low']*(data['Adj Close']/data['Close']), -2)
+    data['High'] = round(data['High']*(data['Adj Close']/data['Close']), -2)
+    data['Close'] = round(data['Close']*(data['Adj Close']/data['Close']), -2)
+    return data
+
+
+def SMA(df: DataFrame, day: int) -> Series:
+    return df.Close.rolling(day).mean().tail(100)
+
+
+def eliminate_date(df: DataFrame) -> list:
+    '''
+    eliminate_date : Eliminate date-off
+
+    Parameters
+    ----------
+    df : DataFarame
+
+    Returns
+    -------
+    list
+        List of day-off
+    '''
+    avail = list(df.tail(100).index.strftime('%Y-%m-%d'))
+    all = list(pd.date_range(avail[0], avail[-1]).strftime('%Y-%m-%d'))
+    eliminate = []
+    for date in all:
+        if date not in avail:
+            eliminate.append(date)
+
+    return eliminate
+
+
+def volume_color(df: DataFrame) -> list:
+    '''
+    volume_color : Asign volume bar color base on previous value
+
+    Parameters
+    ----------
+    df : DataFrame
+
+
+    Returns
+    -------
+    list
+
+    '''
+    vol = df['Volume'].tail(100).to_list()
+    col = []
+    for i in range(len(vol)):
+        if i == 0:
+            col.append('#26A69A')
+        else:
+
+            if vol[i] > vol[i-1]:
+                col.append('#26A69A')
+            else:
+                col.append('#EF5350')
+    return col
+
+
+def layout(com='AAA', exchange='HOSE', indi=indis[0]):
     return html.Div([
         html.Div(
             [dcc.Dropdown(
-            id = 'exchange',
-            options = [
-                {"label": x, "value": x} for x in exchanges
-            ],
-            value=exchange,
-            clearable=False,
-        ),
+                id='exchange',
+                options=[
+                    {"label": x, "value": x} for x in exchanges
+                ],
+                value=exchange,
+                clearable=False,
+            ),
                 dcc.Dropdown(
-            id = 'com',
-            value=com,
-            clearable=False,
-        ),
-        dcc.Dropdown(
-            id = 'indicator',
-            options = [
-                {"label": x, "value": x} for x in indis
-            ],
-            value=[indi],
-            clearable=False,
-            multi=True,
-            
-        )
-        ]),
-    dcc.Graph(className='plot', id='chart')
-])
+                id='com',
+                value=com,
+                clearable=False,
+            ),
+                dcc.Dropdown(
+                id='indicator',
+                options=[
+                    {"label": x, "value": x} for x in indis
+                ],
+                value=[indi],
+                clearable=False,
+                multi=True,
 
-def SMA(df, day):
-    return df.Close.rolling(day).mean().tail(100)
+            )
+            ]),
+        dcc.Graph(className='plot', id='chart')
+    ])
 
-sma_color = ['blue','red','orange']
 
-@callback(Output('com','options'),Input('exchange','value'))
-def update_date_dropdown(name):
+@callback(Output('com', 'options'), Input('exchange', 'value'))
+def update_exchange_com(name):
     return [{'label': i, 'value': i} for i in exchange_com_dict[name]]
-    # exchange_com_dict[name][0]
-    # ,Output('com','value')
 
-@callback(Output("chart", "figure"),Input("exchange", "value"), Input("com", "value"), Input('indicator', 'value'))
-def update_bar_chart(exchange,com, indi):
+
+@callback(Output("chart", "figure"), Input("exchange", "value"), Input("com", "value"), Input('indicator', 'value'))
+def update_bar_chart(exchange, com, indis):
 
     path = f'datas/{exchange}/{com}.csv'
-    df = pd.read_csv(path)
-    df.drop(labels='Unnamed: 0', axis=1, inplace=True)
-    df['Date'] = pd.to_datetime(df['Date'],format='%d/%m/%Y')
-    # df['SMA'] = df.Close.rolling(20).mean()
-    figdata=[go.Candlestick(x=df.tail(100)['Date'],
-                open=df.tail(100)['Open'],
-                high=df.tail(100)['High'],
-                low=df.tail(100)['Low'],
-                close=df.tail(100)['Close'],showlegend=False)]
-    for i in range(len(indi)):
-        if indi[i].startswith('sma'):
+    df = pd.read_csv(path, index_col=0)
+    df = process(df)
+    col = volume_color(df)
+    max_vol = df['Volume'].tail(100).max()
+
+    figdata = [go.Candlestick(x=df.tail(100).index,
+                              open=df.tail(100)['Open'],
+                              high=df.tail(100)['High'],
+                              low=df.tail(100)['Low'],
+                              close=df.tail(100)['Close'], showlegend=False),
+               go.Bar(x=df.tail(100).index, y=df['Volume'].tail(100), yaxis='y2', marker=dict(color=col, opacity=0.3), showlegend=False)]
+
+    for indi in indis:
+        if indi.startswith('sma'):
             smafig = []
-            day = int(indi[i].split('-')[1])
-            smafig.append(go.Scatter(x=df.Date.tail(100), y=SMA(df, day), line=dict( width=1), name=indi[i]))
+            day = int(indi.split('-')[1])
+            smafig.append(go.Scatter(x=df.tail(100).index, y=SMA(
+                df, day), line=dict(width=1), name=indi))
             figdata.extend(smafig)
-        if indi[i] == 'par' :
-            indi_par = PSARIndicator(df['High'],df['Low'],df['Close'])
+        if indi == 'par':
+            indi_par = PSARIndicator(df['High'], df['Low'], df['Close'])
             par = indi_par.psar().tail(100)
-            figdata.append(go.Scatter(x=df.Date.tail(100), y=par,mode='markers',marker=dict(size=4),name= 'parabolic'))
-    
+            figdata.append(go.Scatter(x=df.tail(100).index, y=par,
+                           mode='markers', marker=dict(size=4), name='Parabolic'))
 
-    df = df.tail(100)
+    fig = go.Figure(data=figdata)
 
-    fig = go.Figure(data= figdata)
-    
-    fig.update_layout(title= dict(text='100 days chart'),                 
-                            paper_bgcolor='#ffffff',
-                            plot_bgcolor='#ffffff',
-                            modebar=dict(add=['drawopenpath','eraseshape'],remove=['lasso'],orientation='v'),xaxis_rangeslider_visible=False)
-    fig.update_yaxes(title_text= 'Price',
-                            showgrid=False,
-                            )
+    fig.update_traces(increasing_fillcolor='#26A69A', increasing_line=dict(color='#26A69A', width=0.5),
+                      decreasing_fillcolor='#EF5350', decreasing_line=dict(color='#EF5350', width=0.5), line=dict(width=0.5), selector=dict(type='candlestick'))
 
-    fig.update_traces(increasing_fillcolor='#26A69A',increasing_line=dict(color='#26A69A',width=0.5),
-    decreasing_fillcolor='#EF5350',decreasing_line=dict(color='#EF5350',width=0.5),line=dict(width=0.5), selector=dict(type='candlestick'))
+
+    fig.update_layout(title=dict(text=f'{com} 100 DAYS CHART',x=0.5),
+                      paper_bgcolor='#ffffff',
+                      plot_bgcolor='#ffffff',
+                      modebar=dict(add=['drawopenpath', 'eraseshape'], remove=['lasso'], orientation='v'), xaxis_rangeslider_visible=False,
+                      yaxis=dict(
+        title="Price",
+        titlefont=dict(
+            color="#1f77b4"
+        ),
+        tickfont=dict(
+            color="#1f77b4"
+        )
+    ),
+        yaxis2=dict(
+
+        anchor="free",
+        overlaying="y",
+        side="left",
+        position=0.15,
+        range=[0, max_vol*6],
+        visible=False,
+        fixedrange=True
+    ))
+    fig.update_yaxes(showgrid=False)
+    fig.update_xaxes(
+        rangebreaks=[
+            dict(values=eliminate_date(df))
+        ]
+    )
+
     return fig
-

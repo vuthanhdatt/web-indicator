@@ -1,7 +1,6 @@
 import dash
 import dash_core_components as dcc
 
-
 dash.register_page(__name__)
 
 text = '''

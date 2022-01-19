@@ -1,13 +1,15 @@
-import pandas as pd
-import aiohttp
+import ast
 import asyncio
 import logging
-from datetime import date
-import ast
 import os
+from datetime import date
+
+import aiohttp
+import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
+
 load_dotenv()
 
 start_date = '2000-01-01'
@@ -181,13 +183,13 @@ if __name__ == '__main__':
     logger.info('Load all com upcom')
 
 
-    write_com('hose',hose_com)
-    write_com('hnx',hnx_com)
+    # write_com('hose',hose_com)
+    # write_com('hnx',hnx_com)
     write_com('upcom',upcom_com)
 
 
    
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(get_price('hose',hose_com))
-    loop.run_until_complete(get_price('hnx',hnx_com))
+    # loop.run_until_complete(get_price('hose',hose_com))
+    # loop.run_until_complete(get_price('hnx',hnx_com))
     loop.run_until_complete(get_price('upcom',upcom_com))

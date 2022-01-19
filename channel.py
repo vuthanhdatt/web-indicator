@@ -1,10 +1,10 @@
 import os
-from dotenv import load_dotenv
 from datetime import date
+
 import telegram
+from dotenv import load_dotenv
 
 from indicator import text
-
 
 if __name__ == '__main__':
     
