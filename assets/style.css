@@ -42,6 +42,13 @@
     left: 50%;
     transform: translate(-50%, -50%);
 }
+
+
+.rsi-fig { width: 80vw;
+    height: 40vh;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;}
 /* .card {
     border: 0px 
 } */

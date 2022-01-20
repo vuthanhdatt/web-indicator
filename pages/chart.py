@@ -8,6 +8,7 @@ from dash import Input, Output, callback
 from pandas import DataFrame, Series
 
 from ta.trend import PSARIndicator
+from ta.momentum import RSIIndicator
 
 dash.register_page(__name__)
 
@@ -25,7 +26,7 @@ exchange_com_dict = dict(HOSE=load_com(
 exchanges = list(exchange_com_dict.keys())
 
 # Available indicator
-indis = ['sma-5', 'sma-50', 'sma-200', 'par']
+indis = ['sma-5', 'sma-50', 'sma-200', 'par','rsi']
 
 
 def process(data: DataFrame) -> DataFrame:
@@ -135,7 +136,13 @@ def layout(com='AAA', exchange='HOSE', indi=indis[0]):
 
             )
             ]),
-        dcc.Graph(className='plot', id='chart')
+        dcc.Graph(className='plot', id='chart'),
+        dcc.Graph(className='rsi-fig', id='rsi-chart',figure={ 'data': [], 'layout': {
+                      'paper_bgcolor':'#ffffff',
+                      'plot_bgcolor':'#ffffff',
+                      'yaxis':dict(visible=False),
+                      'xaxis':dict(visible=False)}
+                      , 'frames': [],},config=dict(displayModeBar =False))
     ])
 
 
@@ -144,7 +151,7 @@ def update_exchange_com(name):
     return [{'label': i, 'value': i} for i in exchange_com_dict[name]]
 
 
-@callback(Output("chart", "figure"), Input("exchange", "value"), Input("com", "value"), Input('indicator', 'value'))
+@callback(Output("chart", "figure"),Output('rsi-chart', 'figure'), Input("exchange", "value"), Input("com", "value"), Input('indicator', 'value'))
 def update_bar_chart(exchange, com, indis):
 
     path = f'datas/{exchange}/{com}.csv'
@@ -208,5 +215,18 @@ def update_bar_chart(exchange, com, indis):
             dict(values=eliminate_date(df))
         ]
     )
-
-    return fig
+    rsi_indi = RSIIndicator(df['Close'])
+    rsi = rsi_indi.rsi()
+    df['low-rsi'] = 30
+    df['high-rsi'] =70
+    rsi_fig = go.Figure(data= [go.Scatter(x=df.tail(100).index, y=rsi.tail(100), line=dict(width=1), name='rsi'),
+    go.Scatter(x=df.tail(100).index, y=df['low-rsi'].tail(100), line=dict(width=1,dash='dash'), showlegend=False),
+    go.Scatter(x=df.tail(100).index, y=df['high-rsi'].tail(100), line=dict(width=1,dash='dash'), showlegend=False)])
+    
+    rsi_fig.update_layout(title=dict(text=f'{com} 100 DAYS CHART',x=0.5),
+                      paper_bgcolor='#ffffff',
+                      plot_bgcolor='#ffffff',)
+    if 'rsi' in indis:
+        return fig, rsi_fig
+    
+    return fig, dash.no_update
