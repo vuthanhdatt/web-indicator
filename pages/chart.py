@@ -148,8 +148,8 @@ def update_exchange_com(name):
 
 @callback(Output("chart", "figure"),Output('rsi-chart', 'figure'), Input("exchange", "value"), Input("com", "value"), Input('indicator', 'value'))
 def update_bar_chart(exchange, com, indis):
-
-    path = f'datas/{exchange}/{com}.csv'
+    exchange_lower=exchange.lower()
+    path = f'https://raw.githubusercontent.com/vuthanhdatt/web-indicator/main/datas/{exchange_lower}/{com}.csv'
     df = pd.read_csv(path, index_col=0)
     df = process(df)
     col = volume_color(df)
