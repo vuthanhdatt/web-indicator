@@ -6,6 +6,8 @@ import dash_html_components as html
 app = dash.Dash(
     __name__, plugins=[dl.plugins.pages], external_stylesheets=[dbc.themes.YETI]
 )
+#Deploy
+server = app.server
 
 LOGO = 'https://raw.githubusercontent.com/vuthanhdatt/web-indicator/main/images/brand-img.png'
 
