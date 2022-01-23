@@ -137,12 +137,7 @@ def layout(com='AAA', exchange='HOSE', indi=indis[0]):
             )
             ]),
         dcc.Graph(className='plot', id='chart'),
-        dcc.Graph(className='rsi-fig', id='rsi-chart',figure={ 'data': [], 'layout': {
-                      'paper_bgcolor':'#ffffff',
-                      'plot_bgcolor':'#ffffff',
-                      'yaxis':dict(visible=False),
-                      'xaxis':dict(visible=False)}
-                      , 'frames': [],},config=dict(displayModeBar =False))
+        dcc.Graph(className='rsi-fig', id='rsi-chart',config=dict(displayModeBar =False))
     ])
 
 
@@ -226,7 +221,13 @@ def update_bar_chart(exchange, com, indis):
     rsi_fig.update_layout(title=dict(text=f'{com} 100 DAYS CHART',x=0.5),
                       paper_bgcolor='#ffffff',
                       plot_bgcolor='#ffffff',)
+    dummy_rsi = go.Figure(data= [], layout={
+                      'paper_bgcolor':'#ffffff',
+                      'plot_bgcolor':'#ffffff',
+                      'yaxis':dict(visible=False),
+                      'xaxis':dict(visible=False)}
+    )
     if 'rsi' in indis:
         return fig, rsi_fig
     
-    return fig, dash.no_update
+    return fig, dummy_rsi

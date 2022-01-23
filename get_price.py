@@ -137,7 +137,7 @@ async def get_price_history(symbol,start,end):
     url = 'https://finance.vietstock.vn/data/ExportTradingResult'
     headers = {'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.54 Safari/537.36 Edg/95.0.1020.40'}
     form = make_price_history_form(symbol,start,end)
-    async with aiohttp.ClientSession() as session:
+    async with aiohttp.ClientSession(trust_env = True) as session:
         async with session.get(url, headers=headers, data=form) as response:
             html = await response.text()
             df = pd.read_html(html)[1]
@@ -175,10 +175,10 @@ if __name__ == '__main__':
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.54 Safari/537.36 Edg/95.0.1020.40'}
     
     
-    hose_com = get_all_com('hose', cookie, header)
-    logger.info('Load all com hose')
-    hnx_com = get_all_com('hnx',cookie,header)
-    logger.info('Load all com hnx')
+    # hose_com = get_all_com('hose', cookie, header)
+    # logger.info('Load all com hose')
+    # hnx_com = get_all_com('hnx',cookie,header)
+    # logger.info('Load all com hnx')
     upcom_com = get_all_com('upcom',cookie, header)
     logger.info('Load all com upcom')
 

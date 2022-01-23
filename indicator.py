@@ -26,8 +26,8 @@ def com_to_text(l):
     return s.join(n)
 
 # if __name__ == '__main__':
-today = date.today().strftime("%Y-%m-%d")
-# today = '2021-12-23'
+# today = date.today().strftime("%Y-%m-%d")
+today = '2022-01-21'
 
 
 all_com_indi = []

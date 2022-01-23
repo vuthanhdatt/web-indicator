@@ -16,11 +16,19 @@
 } */
 
 .blog {
-    width: 80vw;
+    margin-top: 10vh;
+    width: 60vw;
     height: 20vh;
     display: block;
     margin-left: auto;
     margin-right: auto;
+}
+.blog-post{
+    width: 60vw;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10vh;
 }
 .home {
     width: 100vw;
@@ -52,3 +60,17 @@
 /* .card {
     border: 0px 
 } */
+
+.card {
+    position: relative;
+    
+    display: flex;
+    
+    flex-direction: column;
+    min-width: 0;
+    word-wrap: break-word;
+    background-color: #fff;
+    background-clip: border-box;
+    border: 0px;
+    border-radius: 0;
+}
