@@ -47,9 +47,9 @@ for com in hose_com:
     if df.shape[0] >30:
         indi = add_all_ta_features(
         df, open="Open", high="High", low="Low", close="Close", volume="Volume", fillna=True)
-        if indi['trend_psar_down_indicator'][today].values == 1:
+        if indi['trend_psar_down_indicator'][today] == 1:
             psar_down_com.append(com)
-        if indi['trend_psar_up_indicator'][today].values == 1:
+        if indi['trend_psar_up_indicator'][today]== 1:
             psar_up_com.append(com)
 
 text = f'*Cập nhật ngày {today}*\n\
