@@ -7,8 +7,9 @@ import plotly.graph_objects as go
 from dash import Input, Output, callback
 from pandas import DataFrame, Series
 
-from ta.trend import PSARIndicator
+from ta.trend import PSARIndicator, EMAIndicator
 from ta.momentum import RSIIndicator
+from ta.volatility import BollingerBands
 
 dash.register_page(__name__)
 
@@ -26,7 +27,7 @@ exchange_com_dict = dict(HOSE=load_com(
 exchanges = list(exchange_com_dict.keys())
 
 # Available indicator
-indis = ['sma-5', 'sma-50', 'sma-200', 'par','rsi']
+indis = ['sma-14', 'sma-50', 'sma-200', 'par','rsi','bb','ema-14','ema-50','ema-200']
 
 
 def process(data: DataFrame) -> DataFrame:
@@ -164,16 +165,32 @@ def update_bar_chart(exchange, com, indis):
 
     for indi in indis:
         if indi.startswith('sma'):
-            smafig = []
             day = int(indi.split('-')[1])
-            smafig.append(go.Scatter(x=df.tail(100).index, y=SMA(
+            figdata.append(go.Scatter(x=df.tail(100).index, y=SMA(
                 df, day), line=dict(width=1), name=indi))
-            figdata.extend(smafig)
+            
+        if indi.startswith('ema'):
+            day = int(indi.split('-')[1])
+            indi_ema = EMAIndicator(df['Close'],day)
+            ema = indi_ema.ema_indicator().tail(100)
+            figdata.append(go.Scatter(x=df.tail(100).index,y=ema, line=dict(width=1), name=indi))
         if indi == 'par':
             indi_par = PSARIndicator(df['High'], df['Low'], df['Close'])
             par = indi_par.psar().tail(100)
             figdata.append(go.Scatter(x=df.tail(100).index, y=par,
-                           mode='markers', marker=dict(size=4), name='Parabolic'))
+                           mode='markers', marker=dict(size=2.5), name='Parabolic'))
+        if indi == 'bb':
+            indi_bb = BollingerBands(df['Close'])
+            bbh = indi_bb.bollinger_hband().tail(100)
+            bbm = indi_bb.bollinger_mavg().tail(100)
+            bbl = indi_bb.bollinger_lband().tail(100)
+            figdata.extend([go.Scatter(x=df.tail(100).index, y=bbh, line=dict(width=1,color='#507EFF'), name='Parabolic1',showlegend=False),
+                           go.Scatter(x=df.tail(100).index, y=bbm,
+                            line=dict(width=1,color='#F49D5C'), name='2',fill='tonexty',fillcolor='rgba(232,239,243,0.5)',showlegend=False),
+                           go.Scatter(x=df.tail(100).index, y=bbl,
+                            line=dict(width=1,color='#507EFF'), name='Bollinger Band',fill='tonexty',fillcolor='rgba(232,239,243,0.5)')
+                           ])
+
 
     fig = go.Figure(data=figdata)
 
