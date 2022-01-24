@@ -33,9 +33,11 @@ When come into technical analysis field, I realize that it's hard to find out wh
 ## Demo
 [Telegram](https://t.me/+TwX0gzHQEf85Yjhl) channel
 
-[Web](https://bot-indicator.herokuapp.com/) app
+
 
 ![telegram-channel](https://github.com/vuthanhdatt/web-indicator/blob/main/images/demo-telegram.jpg)
+
+[Web](https://bot-indicator.herokuapp.com/) app
 
 ![web-app](https://github.com/vuthanhdatt/web-indicator/blob/main/images/web-demo.png)
 ## How it build
