@@ -1,8 +1,5 @@
-name: update-price
+name: Daily update
 on:
-  push:
-    branches:
-      - main
   schedule:
     - cron: "15 8 * * 1-5" #Run at 8:15 UTC every day except weekend
 jobs:
@@ -10,15 +7,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - name: checkout repo content
+      - name: Checkout repo content
         uses: actions/checkout@v2 # checkout the repository content to github runner
 
-      - name: setup python
+      - name: Setup python
         uses: actions/setup-python@v2
         with:
           python-version: '3.9.7' # install the python version needed
           
-      - name: install python packages
+      - name: Install python packages
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
@@ -27,13 +24,13 @@ jobs:
           # TOKEN: ${{secrets.TOKEN}}
           COOKIES: ${{secrets.COOKIES}}
         run: python get_price.py
-      - name: commit files
+      - name: Commit files
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add -A
           git commit -m "Auto update data" -a
-      - name: push changes
+      - name: Push changes
         uses: ad-m/github-push-action@v0.6.0
         with:
           github_token: ${{secrets.ACCESS_TOKEN_GITHUB}}
