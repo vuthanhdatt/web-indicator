@@ -27,7 +27,7 @@ def get_all_com_token(cookies, headers):
 ```
 This function return token for the current session, so I can use this token append into my header request. 
 ### Get all company in stock market
-Since each page only returns 50 companies, while there are over 1600 companies in the stock market. To get all the companies, I create a function and loop until there is no companies return. This function returns a list of all companies in the chosen exchange.
+Since each [page](https://finance.vietstock.vn/doanh-nghiep-a-z?page=1) only returns maximum 50 companies, while there are over 1600 companies in the stock market. To get all the companies, I create a function and loop until there is no companies return. This function returns a list of all companies in the chosen exchange.
 ```python
 def get_all_com(exchange, cookies, headers):
     '''
