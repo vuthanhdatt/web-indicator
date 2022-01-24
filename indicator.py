@@ -91,7 +91,7 @@ hose_indi = calculate('hose')
 hnx_indi = calculate('hnx')
 upcom_indi = calculate('upcom')
 
-texts = [f''' *Cập nhật ngày {today}*
+texts = [f''' *Update {today}*
 _HOSE_, Parabolic SAR
 - Company {com_to_text(hose_indi['psar_up'],'HOSE',"par")} stop going down and reverse
 - Company {com_to_text(hose_indi['psar_down'],'HOSE',"par")} stop going up and reverse
