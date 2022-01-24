@@ -4,7 +4,7 @@ from datetime import date
 import telegram
 from dotenv import load_dotenv
 
-from indicator import text
+from indicator import texts
 
 if __name__ == '__main__':
     
@@ -13,7 +13,8 @@ if __name__ == '__main__':
 
     today = date.today()
     bot = telegram.Bot(token=TOKEN)
-    bot.send_message(chat_id='-1001453202586',text=text,parse_mode='Markdown')
+    for text in texts:
+        bot.send_message(chat_id='-1001453202586',text=text,parse_mode='Markdown',disable_web_page_preview=True)
     updates = bot.get_updates()
 
 

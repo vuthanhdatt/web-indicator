@@ -175,21 +175,21 @@ if __name__ == '__main__':
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.54 Safari/537.36 Edg/95.0.1020.40'}
     
     
-    # hose_com = get_all_com('hose', cookie, header)
-    # logger.info('Load all com hose')
-    # hnx_com = get_all_com('hnx',cookie,header)
-    # logger.info('Load all com hnx')
+    hose_com = get_all_com('hose', cookie, header)
+    logger.info('Load all com hose')
+    hnx_com = get_all_com('hnx',cookie,header)
+    logger.info('Load all com hnx')
     upcom_com = get_all_com('upcom',cookie, header)
     logger.info('Load all com upcom')
 
 
-    # write_com('hose',hose_com)
-    # write_com('hnx',hnx_com)
+    write_com('hose',hose_com)
+    write_com('hnx',hnx_com)
     write_com('upcom',upcom_com)
 
 
    
     loop = asyncio.get_event_loop()
-    # loop.run_until_complete(get_price('hose',hose_com))
-    # loop.run_until_complete(get_price('hnx',hnx_com))
+    loop.run_until_complete(get_price('hose',hose_com))
+    loop.run_until_complete(get_price('hnx',hnx_com))
     loop.run_until_complete(get_price('upcom',upcom_com))
