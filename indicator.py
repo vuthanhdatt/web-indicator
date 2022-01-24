@@ -48,7 +48,7 @@ def calculate(exchange):
         coms = content.split(',')
         f.close()
 
-    coms = coms[:100]
+    coms = coms[:-1]
     for com in coms:
         df = pd.read_csv(f'datas/{exchange}/{com}.csv',index_col=0)
         df = process(df,100)
