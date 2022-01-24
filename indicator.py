@@ -37,7 +37,7 @@ def calculate(exchange):
     psar_down = []
     psar_up = []
     overbought = []
-    oversell = []
+    oversold = []
     bbh=[]
     bbl=[]
     sma_up=[]
@@ -63,7 +63,7 @@ def calculate(exchange):
             if indi['momentum_rsi'][-1] >70:
                 overbought.append(com)
             if indi['momentum_rsi'][-1] <30:
-                oversell.append(com)   
+                oversold.append(com)   
             if indi['volatility_bbhi'][-1] == 1:
                 bbh.append(com)
             if indi['volatility_bbli'][-1] == 1:
@@ -76,7 +76,7 @@ def calculate(exchange):
     indis['psar_up'] = psar_up
     indis['psar_down'] = psar_down
     indis['overbought'] = overbought
-    indis['oversell'] = oversell
+    indis['oversold'] = oversold
     indis['bbh'] = bbh
     indis['bbl'] = bbl
     indis['sma_up'] = sma_up
@@ -113,19 +113,19 @@ _UPCOM_, Parabolic SAR
 f'''
 _HOSE_, RSI
 - Company {com_to_text(hose_indi['overbought'],'HOSE',"rsi")} is overbought
-- Company {com_to_text(hose_indi['oversell'],'HOSE',"rsi")} is oversell
+- Company {com_to_text(hose_indi['oversold'],'HOSE',"rsi")} is oversold
 ''',
 
 f'''
 _HNX_, RSI
 - Company {com_to_text(hnx_indi['overbought'],'HNX',"rsi")} is overbought
-- Company {com_to_text(hnx_indi['oversell'],'HNX',"rsi")} is oversell
+- Company {com_to_text(hnx_indi['oversold'],'HNX',"rsi")} is oversold
 ''',
 
 f'''
 _UPCOM_, RSI
 - Company {com_to_text(upcom_indi['overbought'],'UPCOM',"rsi")} is overbought
-- Company {com_to_text(upcom_indi['oversell'],'UPCOM',"rsi")} is oversell
+- Company {com_to_text(upcom_indi['oversold'],'UPCOM',"rsi")} is oversold
 ''',
 
 f'''
