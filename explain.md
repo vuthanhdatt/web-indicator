@@ -6,7 +6,6 @@ I will explain in detail all technical solutions I've used in this project here.
 2. [Telegram Bot](#telegram-bot)
 3. [Visualizing](#visualizing)
 4. [Updating Ability](#updating-ability)
-5. [Improvement](#improvement)
 
 ***
 ## Datas
@@ -153,7 +152,7 @@ for text in texts:
 ```
 
 ## Visualizing
-When users get an alert message in telegram, maybe they want to check if this company actually met this indicator or not. I use [Dash](https://github.com/plotly/dash) and [Plotly](https://github.com/plotly/plotly.py) to create a web app that can visualize candlestick charts and indicators. Therefore, users can simply click on a company link in Telegram message, it will lead to my web app with this indicator. In this web app, I also create a blog page, which will provide technical analysis articles, like .
+When users get an alert message in telegram, maybe they want to check if this company actually met this indicator or not. I use [Dash](https://github.com/plotly/dash) and [Plotly](https://github.com/plotly/plotly.py) to create a web app that can visualize candlestick charts and indicators. Therefore, users can simply click on a company link in Telegram message, it will lead to my web app with this indicator. In this web app, I also create a blog page, which will provide technical analysis articles, like [this](https://bot-indicator.herokuapp.com/blog/par).
 
 
 ### Pages
@@ -190,9 +189,75 @@ Finally, I put all these pages into [`app.py`](https://github.com/vuthanhdatt/we
 
 ## Updating Ability
 
+Now, this bot may be helpful for us to find a company, but if it can send messages only one time, it will be very useless. To solve this problem, I’ve used GIthub Action to automate, calculate and send messages everyday.
+### Set up job
+Github action using workflow to running action, each workflow contains many jobs. My workflow is in [`.github\workflows\update.yml`](https://github.com/vuthanhdatt/web-indicator/blob/main/.github/workflows/update.yml) file. I will explain detail how it work here.
+Fisrtly, I have this code to specify when my bot will run. It will run on 8:15 UTC(15:15 GMT +7 Hanoi) everyday except weekend.
+```yml
+on:
+  schedule:
+    - cron: "15 8 * * 1-5" #Run at 8:15 UTC every day except weekend
+```
+Then I choose Ubuntu for running environment
+
+```yml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+```
+
+Then it will checkout my Github repo and set up python 3.9.7 environment
+```yml
+- name: Checkout repo content
+    uses: actions/checkout@v2 # checkout the repository content to github runner
+
+- name: Setup python
+    uses: actions/setup-python@v2
+    with:
+        python-version: '3.9.7' # install the python version needed
+```
+Then it install all requirements package.
+```yml
+- name: Install python packages
+    run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+```
+Running `get_prcie.py` file to get today data.
+```yml
+- name: Get today price
+    env:
+        COOKIES: ${{secrets.COOKIES}}
+    run: python get_price.py
+```
+Then commit and push data back to my repository. I use [action user](https://github.com/actions-user) to auto commit.
+```yml 
+- name: Commit files
+    run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add -A
+        git commit -m "Auto update data" -a
+    - name: Push changes
+    uses: ad-m/github-push-action@v0.6.0
+    with:
+        github_token: ${{secrets.ACCESS_TOKEN_GITHUB}}
+        branch: main 
+```
+Finally, I will run `channel.py` file to calculate and send message with new data to Telegram channel.
+```yml
+- name: Send message to Telegram channel
+    env:
+        TOKEN: ${{secrets.TOKEN}}
+    run: python channel.py
+```
 
 
 
 
 
-## Improvement
+
+
+
+
