@@ -22,11 +22,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      - name: execute py script # run main.py to update the lastest data
+      - name: Get today price
         env:
-          TOKEN: ${{secrets.TOKEN}}
+          # TOKEN: ${{secrets.TOKEN}}
           COOKIES: ${{secrets.COOKIES}}
-        run: python channel.py
+        run: python get_price.py
       - name: commit files
         run: |
           git config --local user.email "action@github.com"
@@ -38,3 +38,7 @@ jobs:
         with:
           github_token: ${{secrets.ACCESS_TOKEN_GITHUB}}
           branch: main  
+      - name: Send message to Telegram channel
+        env:
+          TOKEN: ${{secrets.TOKEN}}
+        run: python channel.py
